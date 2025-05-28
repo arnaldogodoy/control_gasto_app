@@ -1,8 +1,8 @@
 import mysql.connector
-import logging
+#import logging
 from config import config
 
-logging.basicConfig(level=logging.DEBUG) 
+#logging.basicConfig(level=logging.DEBUG) 
 
 #Conexion a la base de datos:
 conexion = mysql.connector.connect(
