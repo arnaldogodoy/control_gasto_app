@@ -17,16 +17,16 @@ conexion = mysql.connector.connect(
 def logea_usuario(correo, clave):
     try:
         cursor = conexion.cursor()
-        consulta = "select 1 from usuario where email = %s and password = %s and activo = 1"
+        consulta = "select id from usuario where email = %s and password = %s and activo = 1"
         cursor.execute(consulta, params=(correo,clave))
         resultado = cursor.fetchone()
         if resultado:
-            return True
+            return True, resultado
         else:
-            return False
+            return False, None
     except Exception as e:
         print(f"Error al logear usuario: {e}")
-        return False
+        return False 
     finally:
         cursor.close()
 
@@ -143,6 +143,82 @@ def crea_usuario(nombre, apellido , email, contraseña, id_pregunta1, respuesta1
         return True
     except Exception as er:
         print("Ocurrio un error al momento de crear el usuario")
+    finally:
+        cursor.close()
+
+def obtiene_tipos_tarjetas():
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        consulta = """select id, tipo from tarjeta_credito_tipo where activo = 1"""
+        cursor.execute(consulta)
+        resultados = cursor.fetchall()
+        if resultados:
+            return resultados
+        else:
+            print("No hay tipos de tarjetas habilitados")
+    except Exception as er:
+        print(f"Error al obtener los tipos de tarjetas: {er}")
+    finally:
+        cursor.close()
+
+def obtiene_bancos():
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        consulta = """select id, banco from banco where activo = 1 order by banco"""
+        cursor.execute(consulta)
+        resultados = cursor.fetchall()
+        if resultados:
+            return resultados
+        else:
+            print("No hay bancos habilitados")
+    except Exception as er:
+        print(f"Error al obtener los bancos disponibles: {er}")
+    finally:
+        cursor.close()
+
+def crea_tarjeta_credito(id_usuario, ultimos_numeros, id_tipo, fecha_vencimiento_tarjeta, limite_credito, dia_cierre_resumen, dia_vencimiento_resumen, id_banco):
+    try:
+        cursor = conexion.cursor()
+        consulta_insert = """insert into tarjeta_credito (id_usuario,ultimos_numeros,id_tipo,fecha_vencimiento,limite,dia_cierre_resumen,dia_vence_resumen,id_banco,activa,alias)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,1,%s)
+        """
+        cursor.execute(consulta_insert,(id_usuario,ultimos_numeros,id_tipo,fecha_vencimiento_tarjeta,limite_credito,dia_cierre_resumen,dia_vencimiento_resumen,id_banco))
+        conexion.commit()
+        return True
+    except Exception as er:
+        print(f"Error al insertar la nueva tarjeta de credito: {er}")
+        conexion.rollback()
+        return None
+    finally:
+        cursor.close()
+
+def obtiene_tarjetas_por_usuario(id_usuario):
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        consulta = """
+                    select
+                        tc.id id_tarjeta,
+                        ultimos_numeros,
+                        fecha_vencimiento,
+                        limite,
+                        dia_cierre_resumen,
+                        dia_vence_resumen,
+                        tipo,
+                        banco,
+                        alias
+                    from tarjeta_credito tc
+                    left join tarjeta_credito_tipo tct on tct.id = tc.id_tipo
+                    left join banco b on b.id = tc.id_banco
+                    where id_usuario = %s"""
+        cursor.execute(consulta,(id_usuario,))
+        resultados = cursor.fetchall()
+        if resultados:
+            return resultados
+        else:
+            print("El cliente no tiene tarjetas asociadas")
+    except Exception as er:
+        print("Ocurrio un error al obtener las tarjetas de credito")
+        raise
     finally:
         cursor.close()
 

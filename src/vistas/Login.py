@@ -43,11 +43,14 @@ def inicio_sesion(page: ft.Page):
             page.update()
             return
 
-        if db.logea_usuario(email_val, clave_val):
+        es_valido, user_id = db.logea_usuario(email_val, clave_val)
+        if es_valido:
+            id_usuario = user_id[0]
             snack.content = ft.Text("¡Login exitoso!")
-            snack.bgcolor = ft.Colors.GREEN_ACCENT_700 
+            snack.bgcolor = ft.Colors.GREEN_ACCENT_700
             if page.client_storage:
                 page.client_storage.set("login_email", email_val)
+                page.client_storage.set("login_id",id_usuario)
             page.go(home)
         else:
             snack.content = ft.Text("Usuario o contraseña incorrectos.")

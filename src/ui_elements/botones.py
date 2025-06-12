@@ -13,7 +13,8 @@ def boton_primario(
     icon: str = None, # Parámetro opcional para un icono
     width: int = None, # Permitir ancho personalizable, None para autoajuste
     height: int = 45, # Altura estándar
-    tooltip: str = None # Tooltip opcional
+    tooltip: str = None, # Tooltip opcional
+    disabled: bool = False
 ):
     btn = ft.ElevatedButton(
         text=text,
@@ -24,10 +25,11 @@ def boton_primario(
         height=height,
         elevation=6,
         tooltip=tooltip,
+        disabled= disabled,
         style=ft.ButtonStyle(
             shape=ft.RoundedRectangleBorder(radius=8), # Bordes redondeados consistentes
             padding= ft.padding.symmetric(horizontal=20,vertical=12),
-            side=ft.BorderSide(width=1,color=ft.Colors.with_opacity(0.1,ft.Colors.BLACK))
+            side=ft.BorderSide(width=1,color=ft.Colors.with_opacity(0.1,ft.Colors.BLACK)),
         )
     )
     return btn
@@ -37,7 +39,7 @@ def boton_primario(
 def boton_cancelar_navegacion(
     page: ft.Page,
     text: str,
-    ruta_destino: str,
+    ruta_destino: str = None,
     visible: bool = True,
     on_click: callable = None,
     icon: str = None,
