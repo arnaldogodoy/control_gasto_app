@@ -28,6 +28,7 @@ def agregar_tarjeta(page : ft.Page):
             )
             if guardar_tarjeta:
                 mensaje_snack_bar_ok(page,"Se agrego la tarjeta de credito correctamente")
+                page.go(home)
             else:
                 mensaje_snack_bar_error(page,"No se puedo agregar la tarjeta de credito, intente nuevamente")
         except Exception as er:

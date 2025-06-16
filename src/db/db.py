@@ -176,13 +176,13 @@ def obtiene_bancos():
     finally:
         cursor.close()
 
-def crea_tarjeta_credito(id_usuario, ultimos_numeros, id_tipo, fecha_vencimiento_tarjeta, limite_credito, dia_cierre_resumen, dia_vencimiento_resumen, id_banco):
+def crea_tarjeta_credito(id_usuario, ultimos_numeros, id_tipo, fecha_vencimiento_tarjeta, limite_credito, dia_cierre_resumen, dia_vencimiento_resumen, id_banco, alias):
     try:
         cursor = conexion.cursor()
         consulta_insert = """insert into tarjeta_credito (id_usuario,ultimos_numeros,id_tipo,fecha_vencimiento,limite,dia_cierre_resumen,dia_vence_resumen,id_banco,activa,alias)
         values (%s,%s,%s,%s,%s,%s,%s,%s,1,%s)
         """
-        cursor.execute(consulta_insert,(id_usuario,ultimos_numeros,id_tipo,fecha_vencimiento_tarjeta,limite_credito,dia_cierre_resumen,dia_vencimiento_resumen,id_banco))
+        cursor.execute(consulta_insert,(id_usuario,ultimos_numeros,id_tipo,fecha_vencimiento_tarjeta,limite_credito,dia_cierre_resumen,dia_vencimiento_resumen,id_banco,alias))
         conexion.commit()
         return True
     except Exception as er:
