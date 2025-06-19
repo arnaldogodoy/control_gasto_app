@@ -209,9 +209,13 @@ def obtiene_tarjetas_por_usuario(id_usuario):
                     from tarjeta_credito tc
                     left join tarjeta_credito_tipo tct on tct.id = tc.id_tipo
                     left join banco b on b.id = tc.id_banco
-                    where id_usuario = %s"""
+                    where id_usuario = %s and activa = 1"""
         cursor.execute(consulta,(id_usuario,))
         resultados = cursor.fetchall()
+        # Esto nos dirá la verdad sobre el formato de los datos.
+        if resultados:
+            print("DEBUG EN DB:", type(resultados[0]), resultados[0])
+        # ---------------------------
         if resultados:
             return resultados
         else:
@@ -221,5 +225,20 @@ def obtiene_tarjetas_por_usuario(id_usuario):
         raise
     finally:
         cursor.close()
+
+def deshabilita_usuario_tarjeta_id(id_usuario,id_tarjeta):
+    try:
+        cursor = conexion.cursor()
+        consulta_update = "update tarjeta_credito set activa = 0 where id_usuario = %s and id = %s"
+        cursor.execute(consulta_update, (id_usuario,id_tarjeta))
+        conexion.commit()
+        return True
+    except Exception as er:
+        conexion.rollback()
+        print(f"Error al actualizar: {er}")
+        return False  
+    finally:
+        cursor.close()
+
 
 
