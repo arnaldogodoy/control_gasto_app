@@ -55,7 +55,7 @@ def tarjetas(page : ft.Page):
         border_radius=ft.border_radius.all(10),
     )
 
-    fecha_cierre_resumen = ft.TextField(
+    dia_cierre_resumen = ft.TextField(
         label="Dia de cierre del resumen",
         hint_text= "Ej: 27",
         max_length=2,
@@ -64,7 +64,7 @@ def tarjetas(page : ft.Page):
         prefix_icon= ft.Icons.CALENDAR_MONTH_OUTLINED,
     )
 
-    fecha_vencimiento_resumen = ft.TextField(
+    dia_vence_resumen = ft.TextField(
         label="Dia de vencimiento del resumen",
         border_radius= ft.border_radius.all(10),
         prefix_icon= ft.Icons.CALENDAR_MONTH_OUTLINED,
@@ -73,6 +73,8 @@ def tarjetas(page : ft.Page):
         hint_text="Ej: 08",
     )
 
+    boton_guardar = ft.FilledButton("Guardar Cambios", on_click= lambda e : editar_tarjeta(e))
+    boton_cancelar = ft.TextButton("Cancelar", on_click= lambda e : cierra_modal_editar(e))
     modal_editar = ft.BottomSheet(
         content= ft.Container(
             ft.Column(
@@ -80,12 +82,12 @@ def tarjetas(page : ft.Page):
                     ft.Text("Editar Tarjeta", size= 18, weight= ft.FontWeight.BOLD),
                     alias,
                     limite_tarjeta,
-                    fecha_cierre_resumen,
-                    fecha_vencimiento_resumen,
+                    dia_cierre_resumen,
+                    dia_vence_resumen,
                     ft.Row(
                         [
-                            ft.FilledButton("Guardar Cambios", on_click= lambda e : editar_tarjeta(e)),
-                            ft.TextButton("Cancelar", on_click= lambda e : cierra_modal_editar(e))
+                            boton_guardar,
+                            boton_cancelar
                         ],
                         alignment= ft.CrossAxisAlignment.END
                     )
@@ -99,12 +101,20 @@ def tarjetas(page : ft.Page):
 
     #Agregamos el boton a la pagina
     page.overlay.append(modal_editar)
-
+    #Almacenamos los datos de la tarjeta, asi evitar realizar una llamada a la base de datos si no hubo cambios en la edicion
+    datos_tarjeta_originales ={}
     def abre_modal_editar(e,tarjeta : dict):
+        nonlocal datos_tarjeta_originales
+        datos_tarjeta_originales ={
+            "alias" : tarjeta.get("alias"),
+            "limite" : str(tarjeta.get("limite")),
+            "dia_cierre_resumen" : str(tarjeta.get("dia_cierre_resumen")),
+            "dia_vence_resumen" : str(tarjeta.get("dia_vence_resumen"))
+        }
         id_tarjeta_seleccionada.current = tarjeta.get("id_tarjeta")
         alias.value = tarjeta.get("alias","")
-        fecha_cierre_resumen.value = str(tarjeta.get("dia_cierre_resumen","0"))
-        fecha_vencimiento_resumen.value = str(tarjeta.get("dia_vence_resumen","0"))
+        dia_cierre_resumen.value = str(tarjeta.get("dia_cierre_resumen","0"))
+        dia_vence_resumen.value = str(tarjeta.get("dia_vence_resumen","0"))
         limite_tarjeta.value = str(tarjeta.get("limite","0"))
         modal_editar.open = True
         page.update()       
@@ -113,8 +123,60 @@ def tarjetas(page : ft.Page):
         modal_editar.open = False
         page.update()
 
-    def editar_tarjeta(id_tarjeta : int):
-        print(f"El usuario quiere editar la tarjeta ID : {id_tarjeta}")
+    def editar_tarjeta(e):
+        datos_tarjetas_actuales = {
+            "alias": alias.value.strip(),
+            "limite": limite_tarjeta.value.strip(),
+            "dia_cierre_resumen" : dia_cierre_resumen.value.strip(),
+            "dia_vence_resumen" : dia_vence_resumen.value.strip()
+        }
+
+        if datos_tarjetas_actuales == datos_tarjeta_originales:
+            mensaje_snack_bar_error(page,"No se detectaron cambios en los datos de la tarjeta")
+            modal_editar.open = False
+            page.update()
+            return
+
+        boton_guardar.disabled = True
+        boton_guardar.text = "Guardando..."
+        page.update()
+        try:
+            #Datos de la tarjeta a editar        
+            id_tarjeta = id_tarjeta_seleccionada.current
+            id_usuario = page.client_storage.get("login_id")
+            #Datos a actualizar
+            alias_valor = alias.value.strip()
+            limite_valor = float(limite_tarjeta.value.strip() if limite_tarjeta.value.strip() else 0.0)
+            cierre_valor = int(dia_cierre_resumen.value.strip() if dia_cierre_resumen.value.strip() else 0.0)
+            vence_valor = int(dia_vence_resumen.value.strip() if dia_vence_resumen.value.strip() else 0.0)
+            #Validamos que los dias son validos
+            if not 0 < cierre_valor <= 31 and 0 < vence_valor <= 31:
+                raise ValueError("Los dias de cierre y vencimiento deben ser dias del mes")
+            
+            editar =  db.editar_usuario_tarjeta_id(alias= alias_valor,
+                                                limite= limite_valor,
+                                                dia_cierre_resumen=cierre_valor,
+                                                dia_vence_resumen= vence_valor,
+                                                id_tarjeta=id_tarjeta,
+                                                id_usuario= id_usuario                                        
+                                                )
+            if editar:
+                mensaje_snack_bar_ok(page,"La tarjeta fue editada exitosamente")
+                modal_editar.open = False
+                page.update()
+                actualiza_listado_tarjetas()
+            else:
+                mensaje_snack_bar_error(page,"Error al actualizar los datos de tu tarjeta.")
+        except ValueError as ve:
+            mensaje_snack_bar_error(page,f"{ve}")
+        except Exception as e:
+            mensaje_snack_bar_error(page,"Ocurrio un error inesperado, intente nuevamente.")
+        finally:
+            boton_guardar.disabled = False
+            boton_guardar.text = "Guardar Cambios"
+            page.update()
+    boton_guardar.on_click = editar_tarjeta
+
     
     #---- ELIMINAR TARJETA ----
     

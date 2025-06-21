@@ -192,7 +192,7 @@ def crea_tarjeta_credito(id_usuario, ultimos_numeros, id_tipo, fecha_vencimiento
     finally:
         cursor.close()
 
-def obtiene_tarjetas_por_usuario(id_usuario):
+def obtiene_tarjetas_por_usuario(id_usuario : int):
     try:
         cursor = conexion.cursor(dictionary=True)
         consulta = """
@@ -212,10 +212,6 @@ def obtiene_tarjetas_por_usuario(id_usuario):
                     where id_usuario = %s and activa = 1"""
         cursor.execute(consulta,(id_usuario,))
         resultados = cursor.fetchall()
-        # Esto nos dirá la verdad sobre el formato de los datos.
-        if resultados:
-            print("DEBUG EN DB:", type(resultados[0]), resultados[0])
-        # ---------------------------
         if resultados:
             return resultados
         else:
@@ -226,7 +222,7 @@ def obtiene_tarjetas_por_usuario(id_usuario):
     finally:
         cursor.close()
 
-def deshabilita_usuario_tarjeta_id(id_usuario,id_tarjeta):
+def deshabilita_usuario_tarjeta_id(id_usuario : int,id_tarjeta : int,):
     try:
         cursor = conexion.cursor()
         consulta_update = "update tarjeta_credito set activa = 0 where id_usuario = %s and id = %s"
@@ -240,5 +236,18 @@ def deshabilita_usuario_tarjeta_id(id_usuario,id_tarjeta):
     finally:
         cursor.close()
 
+def editar_usuario_tarjeta_id(alias : str, limite,dia_cierre_resumen : int, dia_vence_resumen : int, id_usuario : int ,id_tarjeta : int):
+    try:
+        cursor = conexion.cursor()
+        consulta_update = "update tarjeta_credito set alias = %s ,limite = %s ,dia_cierre_resumen = %s ,dia_vence_resumen = %s where id_usuario = %s and id = %s"
+        cursor.execute(consulta_update, (alias,limite, dia_cierre_resumen,dia_vence_resumen,id_usuario,id_tarjeta))
+        conexion.commit()
+        return True
+    except Exception as er:
+        conexion.rollback()
+        print(f"Error al actualizar: {er}")
+        return False  
+    finally:
+        cursor.close()
 
 
