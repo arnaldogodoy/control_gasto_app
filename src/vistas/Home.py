@@ -1,6 +1,7 @@
 import flet as ft
 from ui_elements.UiElements import crea_snack_bar
 from vistas.Tarjetas import tarjetas
+from vistas.Categorias import categorias
 
 def vista_dashboard(page : ft.Page):
     return ft.Column([ft.Text("Dashboard", size=20)])
@@ -15,7 +16,7 @@ mapa_contenidos ={
     0 : vista_dashboard,  
     1 : tarjetas,
     2 : vista_gastos,
-    3 : vista_categorias,
+    3 : categorias,
 }
 
 

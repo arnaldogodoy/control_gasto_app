@@ -250,4 +250,31 @@ def editar_usuario_tarjeta_id(alias : str, limite,dia_cierre_resumen : int, dia_
     finally:
         cursor.close()
 
+def obtener_categorias_por_usuario(id_usuario : int):
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        consulta = """
+        select 
+            gc.id id_categoria,
+            gc.categoria,
+            gc.id_usuario,
+            gca.nombre agrupador,
+            gca.icono
+        from gasto_categoria gc
+        left join gasto_categoria_agrupador gca on gc.id_categoria_agrupador = gca.id
+        where 
+            gc.activa = 1 
+            and (gc.id_usuario is null or gc.id_usuario = %s)
+        order by gca.id;
+        """
+        cursor.execute(consulta, (id_usuario,))
+        resultados = cursor.fetchall()
+        return resultados if resultados else []
+    except Exception as e:
+        print(f"Error al obtener las categorias: {e}")
+        return[]
+    finally:
+        if cursor:
+            cursor.close()
+
 

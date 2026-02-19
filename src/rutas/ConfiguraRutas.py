@@ -7,6 +7,7 @@ from vistas.Home import home
 from vistas.AgregarTarjetas import agregar_tarjeta
 from vistas.Tarjetas  import tarjetas
 from rutas import Rutas
+from vistas.Categorias import categorias
 
 
 
@@ -50,6 +51,11 @@ def configurar_rutas(page: ft.Page):
         elif page.route == Rutas.agregar_tarjeta:
             page.views.append(ft.View(route= Rutas.agregar_tarjeta, 
                                       controls=[agregar_tarjeta(page)],
+                                      vertical_alignment= ft.MainAxisAlignment.CENTER,
+                                      horizontal_alignment= ft.CrossAxisAlignment.CENTER))
+        elif page.route == Rutas.categorias:
+            page.views.append(ft.View(route= Rutas.categorias, 
+                                      controls=[categorias(page)],
                                       vertical_alignment= ft.MainAxisAlignment.CENTER,
                                       horizontal_alignment= ft.CrossAxisAlignment.CENTER))
         else:

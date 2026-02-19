@@ -7,6 +7,7 @@ editar_contraseña = '/edita-contraseña'
 home = '/home'
 tarjeta = '/home/tarjeta'
 agregar_tarjeta = '/tarjeta/nueva'
+categorias = '/categorias'
 
 #Se establencen las urls para cada imagen.
 def ruta_imagen(nombre_imagen):
