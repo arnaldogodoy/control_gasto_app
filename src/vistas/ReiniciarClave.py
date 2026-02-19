@@ -79,27 +79,6 @@ def reiniciar_clave(page: ft.Page):
         boton_cancelar_preguntas.visible = True
         page.update()
 
-
-    def mostrar_paso_email(e):
-        titulo_dinamico.value = "Recuperación de Contraseña"
-        correo.visible = True
-        boton_continuar.visible = True
-        boton_cancelar_inicial.visible = True
-
-        pregunta1_texto.visible = False
-        respuesta1.visible = False
-        respuesta1.value = "" # Limpiar campos
-        respuesta1.error_text = None
-        
-        pregunta2_texto.visible = False
-        respuesta2.visible = False
-        respuesta2.value = "" # Limpiar campos
-        respuesta2.error_text = None
-
-        boton_validar_respuestas.visible = False
-        boton_cancelar_preguntas.visible = False
-        page.update()
-
     def busca_pregunta_usuario_click(e):
         email_val = correo.value.strip()
         if not email_val:

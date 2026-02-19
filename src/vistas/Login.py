@@ -4,6 +4,7 @@ from db import db
 from rutas.Rutas import reiniciar_clave, registro
 from ui_elements.UiElements import crear_tarjeta_formulario
 from ui_elements.botones import boton_primario
+from rutas.Rutas import home
 
 def inicio_sesion(page: ft.Page):
 
@@ -42,12 +43,15 @@ def inicio_sesion(page: ft.Page):
             page.update()
             return
 
-        if db.logea_usuario(email_val, clave_val):
+        es_valido, user_id = db.logea_usuario(email_val, clave_val)
+        if es_valido:
+            id_usuario = user_id[0]
             snack.content = ft.Text("¡Login exitoso!")
-            snack.bgcolor = ft.Colors.GREEN_ACCENT_700 
+            snack.bgcolor = ft.Colors.GREEN_ACCENT_700
             if page.client_storage:
                 page.client_storage.set("login_email", email_val)
-            # page.go("/home")  # Redirige a la página de inicio (tu lógica de dashboard)
+                page.client_storage.set("login_id",id_usuario)
+            page.go(home)
         else:
             snack.content = ft.Text("Usuario o contraseña incorrectos.")
             snack.bgcolor = ft.Colors.RED_ACCENT_700 
